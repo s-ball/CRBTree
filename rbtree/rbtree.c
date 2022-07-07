@@ -94,6 +94,21 @@ void RBinit(RBTree* tree, int (*comp)(const void*, const void*)) {
 void RBiter_release(RBIter* iter) {
 	free(iter);
 }
+
+static void node_destroy(RBNode* node, void (*dele)(const void *)) {
+	if (NULL == node) return;
+	node_destroy(node->child[0], dele);
+	node_destroy(node->child[1], dele);
+	if (dele) dele(node->data);
+	free(node);
+}
+
+void RBdestroy(RBTree* tree, void (*dele)(const void*)) {
+	node_destroy(tree->root, dele);
+	tree->root = NULL;
+	tree->black_depth = 0;
+}
+
 void * RBinsert(RBTree* tree, void* data, int *error) {
 	int how;
 	RBIter* iter = search(tree, data, &how);

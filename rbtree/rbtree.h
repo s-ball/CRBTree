@@ -55,7 +55,7 @@ extern "C" {
 	EXPORT RBIter* RBsearch(RBTree* tree, void* key);
 	EXPORT void* RBnext(RBIter* iter);
 	EXPORT void RBiter_release(RBIter* iter);
-	EXPORT void RBDestroy(RBTree* tree);
+	EXPORT void RBdestroy(RBTree* tree, void (*dele)(const void*));
 
 	/**
 	 * @brief Inserts an array of elements into a valid tree.
