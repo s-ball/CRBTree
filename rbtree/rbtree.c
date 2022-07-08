@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 static RBIter* search(RBTree* tree, void* data, int* how) {
 	if (0 == tree->black_depth) return NULL;
 	int md = 1 + 2 * tree->black_depth;
@@ -85,12 +86,27 @@ static RBNode* fix_red_violation(RBIter* iter, int side) {
 	return iter->elt[0].node;
 }
 
+/**
+ * @brief Initializes a new tree given a comparison function.
+ *
+ * Initialization makes a valid empty tree: the root node is set to NULL,
+ * the black depth to 0 and the comparison function pointer points to the
+ * passed function.
+ *
+ * @param tree : pointer to the RBTree to initialize
+ * @param comp : the comparison function
+*/
 void RBinit(RBTree* tree, int (*comp)(const void*, const void*)) {
 	tree->root = NULL;
 	tree->black_depth = 0;
 	tree->comp = comp;
 }
 
+/**
+ * @brief Release all resources associated with an iterator.
+ *
+ * @param iter : the iterator to release
+*/
 void RBiter_release(RBIter* iter) {
 	free(iter);
 }
@@ -103,12 +119,30 @@ static void node_destroy(RBNode* node, void (*dele)(const void *)) {
 	free(node);
 }
 
+/**
+ * @brief Completely cleans a tree.
+ *
+ * RBdestroy removes all nodes from a tree and if dele is not null, applies
+ * if to any referenced element (intended to free the elements resources).
+ *
+ * @param tree
+ * @param dele
+*/
 void RBdestroy(RBTree* tree, void (*dele)(const void*)) {
 	node_destroy(tree->root, dele);
 	tree->root = NULL;
 	tree->black_depth = 0;
 }
 
+/**
+ * @brief Inserts a new element into a valid tree.
+ *
+ * @param tree : the tree where to insert the element
+ * @param data : the element to insert
+ * @param error : a pointer to an int variable which if not NULL
+ *  will be set to 0 if no error and a non zero value if error
+ * @return : the previous element with same key if any or NULL
+*/
 void * RBinsert(RBTree* tree, void* data, int *error) {
 	int how;
 	RBIter* iter = search(tree, data, &how);
@@ -143,6 +177,20 @@ void * RBinsert(RBTree* tree, void* data, int *error) {
 	return old;
 }
 
+/**
+ * @brief Inserts an array of elements into a valid tree.
+ *
+ * Inserts a number of elements in one single call. The returned value
+ * is the number of elements that did not pre-exist in the tree. If an
+ * element is replaced and if dele is not NULL, it is called with that
+ * element as parameter.
+ *
+ * @param tree : the tree where to insert the elements
+ * @param data : an array of elements
+ * @param n : number of elements in data
+ * @param dele : an optional function to release replaced elements or NULL
+ * @return : the number of new elements inserted in the tree
+*/
 size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 	void (*dele)(const void *)) {
 	int inserted = 0, err;
@@ -174,6 +222,15 @@ static int node_validate(RBNode *node, int (*comp)(const void *, const void *)) 
 	return child_level[0] + (!node->red);
 }
 
+/**
+ * @brief Validates a tree.
+ *
+ * RBvalidate controls that a tree is correctly ordered, contains neither
+ * red nor black violation and that its black_depth is correct.
+ *
+ * @param tree : the tree to validate
+ * @return : 0 if the tree is correct or a (non-zero) error code
+*/
 int RBvalidate(RBTree* tree) {
 	if ((0 == tree->black_depth) && (NULL == tree->root)) return 0;
 	if ((0 == tree->black_depth) || (NULL == tree->root)) return DEPTH_ERROR;

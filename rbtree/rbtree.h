@@ -28,52 +28,27 @@ extern "C" {
 
 	// The public interface functions
 
-	/**
-	 * @brief Initializes a new tree given a comparison function.
-	 *
-	 * Initialization makes a valid empty tree: the root node is set to NULL,
-	 * the black depth to 0 and the comparison function pointer points to the
-	 * passed function.
-	 *
-	 * @param tree : pointer to the RBTree to initialize
-	 * @param comp : the comparison function
-	*/
+	// Initializes a new tree given a comparison function.
 	EXPORT void RBinit(RBTree* tree, int (*comp)(const void*, const void*));
 
-	/**
-	 * @brief Inserts a new element into a valid tree.
-	 *
-	 * @param tree : the tree where to insert the element
-	 * @param data : the element to insert
-	 * @param error : a pointer to an int variable which if not NULL
-	 *  will be set to 0 if no error and a non zero value if error
-	 * @return : the previous element with same key if any or NULL
-	*/
+	// Inserts a new element into a valid tree.
 	EXPORT void *RBinsert(RBTree* tree, void* data, int *error);
 	EXPORT void* RBremove(RBTree* tree, void* key);
 	EXPORT void* RBfind(RBTree* tree, void* key);
 	EXPORT RBIter* RBsearch(RBTree* tree, void* key);
 	EXPORT void* RBnext(RBIter* iter);
+
+	// Release all resources associated with an iterator.
 	EXPORT void RBiter_release(RBIter* iter);
+
+	// Completely cleans a tree.
 	EXPORT void RBdestroy(RBTree* tree, void (*dele)(const void*));
 
-	/**
-	 * @brief Inserts an array of elements into a valid tree.
-	 *
-	 * Inserts a number of elements in one single call. The returned value
-	 * is the number of elements that did not pre-exist in the tree. If an
-	 * element is replaced and if dele is not NULL, it is called with that
-	 * element as parameter.
-	 *
-	 * @param tree : the tree where to insert the elements
-	 * @param data : an array of elements
-	 * @param n : number of elements in data
-	 * @param dele : an optional function to release replaced elements or NULL
-	 * @return : the number of new elements inserted in the tree
-	*/
+	// Inserts an array of elements into a valid tree.
 	EXPORT size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 		void (*dele)( const void *));
 
+	// Validates a tree.
 	EXPORT int RBvalidate(RBTree* tree);
 
 #ifdef __cplusplus
