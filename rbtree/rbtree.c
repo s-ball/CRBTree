@@ -152,6 +152,7 @@ void * RBinsert(RBTree* tree, void* data, int *error) {
 			tree->root = new_node(data);
 			tree->black_depth = 1;
 			tree->root->red = 0;
+			if (error) *error = 0;
 		}
 		return NULL;
 	}
@@ -175,6 +176,102 @@ void * RBinsert(RBTree* tree, void* data, int *error) {
 		tree->black_depth += 1;
 	}
 	return old;
+}
+
+static void iter_push(RBIter* iter, RBNode* node, int side) {
+	iter->elt[++iter->curdepth].node = node;
+	iter->elt[iter->curdepth].right = side;
+}
+
+#ifdef _TEST
+EXPORT
+#else
+static
+#endif // !_TEST
+RBNode* paint_child_red(RBNode* node, int side) {
+	RBNode* child = node->child[side];
+	child->red = 1;
+	if ((! child->child[side] || ! child->child[side]->red)
+		&& child->child[1-side] && child->child[1-side]->red) {
+		// additional rotation
+		child = node->child[side] = rotate(child, side);
+	}
+	if (child->child[side] && child->child[side]->red) {
+		node = rotate(node, 1 - side);
+		node->child[side]->red = 0;
+	}
+	return node;
+}
+
+void* RBremove(RBTree* tree, void* key) {
+	int how;
+	RBIter* iter = search(tree, key, &how);
+	if (how != 0) return NULL;
+	RBNode * node = iter->elt[iter->curdepth].node;
+	void *data = node->data;
+	void** old = &(node->data);
+	if (node->child[1] != NULL) {
+		node = node->child[1];
+		iter_push(iter, node, 1);
+		while (node->child[0] != NULL) {
+			node = node->child[0];
+			iter_push(iter, node, 0);
+		}
+		*old = node->data;
+	}
+	if (0 == iter->curdepth) {
+		tree->root = node->child[0];
+		tree->black_depth -= 1;
+	}
+	else {
+		iter->elt[iter->curdepth - 1].node->child[iter->elt[
+			iter->curdepth].right] = node->child[0]
+		;
+		// handle a possible black violation.
+		if (0 == node->red) {
+			int done = 0;
+			while (! done) {
+				int side = iter->elt[iter->curdepth].right;
+				iter->curdepth -= 1;
+				node = iter->elt[iter->curdepth].node;
+				if (node->red) {
+					// found a red ancestor
+					node->red = 0;
+					node = paint_child_red(node, 1 - side);
+					done = 1;
+				}
+				else if (node->child[1 - side]->red) {
+					// found a red sibling
+					RBNode* old = node;
+					node = rotate(node, 1 - side);
+					node->child[1 - side] = paint_child_red(
+						node->child[1 - side], side);
+					done = 1;
+				}
+				else {
+					node = paint_child_red(node, 1 - side);
+					if (node->red) {
+						node->red = 0;
+						done = 1;
+					}
+				}
+				if (iter->curdepth > 0) {
+					iter->elt[iter->curdepth - 1].node->child[
+						iter->elt[iter->curdepth].right] = node;
+				}
+				else {
+					tree->root = node;
+					done = 1;
+				}
+			}
+		}
+	}
+	// handle a possible red root
+	if (tree->root && tree->root->red) {
+		tree->root->red = 0;
+		tree->black_depth += 1;
+	}
+	return data;
 }
 
 /**
