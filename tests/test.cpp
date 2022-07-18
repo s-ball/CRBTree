@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include<sstream>
 
 
 namespace {
@@ -34,6 +35,7 @@ protected:
 	RBTree tree;
 
 	static void SetUpTestCase() {
+		arr.reserve(SIZE);
 		for (size_t i = 1; i <= SIZE; i++) {
 			arr.push_back(i);
 		}
@@ -52,21 +54,20 @@ protected:
 		return (intptr_t)a - (intptr_t)b;
 	}
 
+	static void dump(void* data, char* buff) {
+		std::stringstream ss;
+		int val = (intptr_t)data;
+		snprintf(buff, 4, "%d", val);
+	}
 };
 
-std::vector<int> TestGlobal::arr{TestGlobal::SIZE};
+std::vector<int> TestGlobal::arr;
 std::mt19937 TestGlobal::rg(0);
 
 TEST_F(TestGlobal, nb_run) {
-	for (unsigned i = 0; i < NB; i++) {
+	for (unsigned j = 0; j < NB; j++) {
 		for (int i : arr) {
 			int error;
-			if (i == 784) {
-				std::cout << " " << i;
-			}
-			else {
-				std::cout << " " << i;
-			}
 			RBinsert(&tree, (void*) i, &error);
 			ASSERT_EQ(0, error);
 			ASSERT_EQ(0, RBvalidate(&tree));
@@ -79,3 +80,30 @@ TEST_F(TestGlobal, nb_run) {
 		ASSERT_EQ(0, tree.black_depth);
 	}
 }
+
+TEST_F(TestGlobal, To32) {
+	for (int i = 1; i < 32; i++) {
+		int error;
+		ASSERT_EQ(nullptr, RBinsert(&tree, (void*)i, &error));
+		EXPECT_EQ(0, error);
+		ASSERT_EQ(0, RBvalidate(&tree));
+	}
+	RBIter* iter = RBfirst(&tree);
+	for (int i = 1; i < 32; i++) {
+		ASSERT_EQ((void*)i, RBnext(iter));
+	}
+	RBiter_release(iter);
+	RBdestroy(&tree, nullptr);
+}
+
+TEST_F(TestGlobal, Dump32) {
+	for (int i = 1; i < 32; i++) {
+		int error;
+		ASSERT_EQ(nullptr, RBinsert(&tree, (void*)i, &error));
+		EXPECT_EQ(0, error);
+		ASSERT_EQ(0, RBvalidate(&tree));
+	}
+	RBdump(&tree, 4, dump);
+	RBdestroy(&tree, nullptr);
+}
+

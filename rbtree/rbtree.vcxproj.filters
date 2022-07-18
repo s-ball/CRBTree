@@ -26,5 +26,8 @@
     <ClCompile Include="rbtree.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="dump.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

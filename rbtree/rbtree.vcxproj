@@ -131,6 +131,7 @@
     <ClInclude Include="rbtree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dump.c" />
     <ClCompile Include="rbtree.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

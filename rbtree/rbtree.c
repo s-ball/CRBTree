@@ -36,6 +36,44 @@ static RBIter* search(RBTree* tree, void* data, int* how) {
 	return iter;
 }
 
+static void iter_push(RBIter* iter, RBNode* node, int side) {
+	iter->elt[++iter->curdepth].node = node;
+	iter->elt[iter->curdepth].right = side;
+}
+
+RBIter* RBfirst(RBTree* tree) {
+	if (0 == tree->black_depth) return NULL;
+	int md = 1 + 2 * tree->black_depth;
+	RBIter* iter = malloc(sizeof(RBIter) + md * sizeof(struct iter_elt));
+	if (NULL == iter) return NULL;
+	RBNode* curr = tree->root;
+	for (int i = 0; i < md; i++) {
+		iter->elt[i].node = curr;
+		iter->elt[i].right = 0;
+		iter->curdepth = i;
+		if (curr->child[0]) curr = curr->child[0];
+		else break;
+	}
+	return iter;
+}
+
+void* RBnext(RBIter* iter) {
+	if (iter->curdepth == -1) return NULL;
+	RBNode* node = iter->elt[iter->curdepth].node;
+	void* data = node->data;
+	if (node->child[1]) {
+		node = node->child[1];
+		iter_push(iter, node, 1);
+		while (node->child[0]) {
+			node = node->child[0];
+			iter_push(iter, node, 0);
+		}
+	}
+	else {
+		while (iter->elt[iter->curdepth--].right);
+	}
+	return data;
+}
 static RBNode* new_node(void* data) {
 	RBNode* node = malloc(sizeof(*node));
 	if (NULL != node) {
@@ -71,15 +109,18 @@ static RBNode* fix_red_violation(RBIter* iter, int side) {
 					1 - side);
 			}
 			parent = rotate(parent, 1 - curside);
-			parent->child[curside]->red = 0;
+			parent->child[1-curside]->red = 1;
+			parent->red = 0;
 			if (iter->curdepth == 1) {
 				return parent;
 			}
 			iter->elt[iter->curdepth - 2].node->child[iter->elt[iter->curdepth - 1].right] = parent;
+			break;
 		}
 		if (iter->curdepth > 2) {
 			iter->curdepth -= 2;
 			if (!iter->elt[iter->curdepth].node->red) break;
+			side = iter->elt[iter->curdepth + 1].right;
 		}
 		else break;
 	}
@@ -99,6 +140,7 @@ static RBNode* fix_red_violation(RBIter* iter, int side) {
 void RBinit(RBTree* tree, int (*comp)(const void*, const void*)) {
 	tree->root = NULL;
 	tree->black_depth = 0;
+	tree->count = 0;
 	tree->comp = comp;
 }
 
@@ -151,6 +193,7 @@ void * RBinsert(RBTree* tree, void* data, int *error) {
 		if (tree->black_depth == 0) {
 			tree->root = new_node(data);
 			tree->black_depth = 1;
+			tree->count = 1;
 			tree->root->red = 0;
 			if (error) *error = 0;
 		}
@@ -175,12 +218,8 @@ void * RBinsert(RBTree* tree, void* data, int *error) {
 		tree->root->red = 0;
 		tree->black_depth += 1;
 	}
+	if (!old) tree->count += 1;
 	return old;
-}
-
-static void iter_push(RBIter* iter, RBNode* node, int side) {
-	iter->elt[++iter->curdepth].node = node;
-	iter->elt[iter->curdepth].right = side;
 }
 
 #ifdef _TEST
@@ -210,6 +249,7 @@ void* RBremove(RBTree* tree, void* key) {
 	RBNode * node = iter->elt[iter->curdepth].node;
 	void *data = node->data;
 	void** old = &(node->data);
+	RBNode* child;
 	if (node->child[1] != NULL) {
 		node = node->child[1];
 		iter_push(iter, node, 1);
@@ -217,18 +257,25 @@ void* RBremove(RBTree* tree, void* key) {
 			node = node->child[0];
 			iter_push(iter, node, 0);
 		}
+		child = node->child[1];
 		*old = node->data;
 	}
+	else {
+		child = node->child[0];
+	}
 	if (0 == iter->curdepth) {
-		tree->root = node->child[0];
+		tree->root = child;
 		tree->black_depth -= 1;
 	}
 	else {
 		iter->elt[iter->curdepth - 1].node->child[iter->elt[
-			iter->curdepth].right] = node->child[0]
+			iter->curdepth].right] = child
 		;
 		// handle a possible black violation.
-		if (0 == node->red) {
+		if (node->child[1] && node->child[1]->red) {
+			node->child[1]->red = 0;
+		}
+		else if (0 == node->red) {
 			int done = 0;
 			while (! done) {
 				int side = iter->elt[iter->curdepth].right;
@@ -243,9 +290,10 @@ void* RBremove(RBTree* tree, void* key) {
 				else if (node->child[1 - side]->red) {
 					// found a red sibling
 					RBNode* old = node;
-					node = rotate(node, 1 - side);
-					node->child[1 - side] = paint_child_red(
-						node->child[1 - side], side);
+					node = rotate(node, side);
+					node->red = 0;
+					node->child[side] = paint_child_red(
+						old, 1 - side);
 					done = 1;
 				}
 				else {
@@ -261,6 +309,7 @@ void* RBremove(RBTree* tree, void* key) {
 				}
 				else {
 					tree->root = node;
+					if (!done) tree->black_depth -= 1;
 					done = 1;
 				}
 			}
@@ -271,6 +320,7 @@ void* RBremove(RBTree* tree, void* key) {
 		tree->root->red = 0;
 		tree->black_depth += 1;
 	}
+	tree->count -= 1;
 	return data;
 }
 
@@ -300,8 +350,9 @@ size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 	return inserted;
 }
 
-static int node_validate(RBNode *node, int (*comp)(const void *, const void *)) {
+static int node_validate(RBNode *node, int *total, int (*comp)(const void *, const void *)) {
 	int child_level[2];
+	*total += 1;
 	for (int i = 0; i < 2; i++) {
 		if (node->child[i] == 0) child_level[i] = 0;
 		else {
@@ -310,7 +361,7 @@ static int node_validate(RBNode *node, int (*comp)(const void *, const void *)) 
 			if ((delta >= 0 && 0 == i) || (delta <= 0 && 1 == i)) {
 				return -ORDER_ERROR;
 			}
-			int lev = node_validate(node->child[i], comp);
+			int lev = node_validate(node->child[i], total, comp);
 			if (lev < 0) return lev;
 			child_level[i] = lev;
 		}
@@ -332,8 +383,10 @@ int RBvalidate(RBTree* tree) {
 	if ((0 == tree->black_depth) && (NULL == tree->root)) return 0;
 	if ((0 == tree->black_depth) || (NULL == tree->root)) return DEPTH_ERROR;
 	if (tree->root->red) return RED_ROOT;
-	int lev = node_validate(tree->root, tree->comp);
+	int total = 0;
+	int lev = node_validate(tree->root, &total, tree->comp);
 	if (lev < 0) return -lev;
 	if (lev != tree->black_depth) return DEPTH_ERROR;
+	if (total != tree->count) return COUNT_ERROR;
 	return 0;
 }
