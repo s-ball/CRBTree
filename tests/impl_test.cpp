@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+
 extern "C" {
 #include "rbinternal.h"
 }
@@ -10,7 +11,6 @@ protected:
 	TestInsertImpl() {
 		RBinit(&tree, compare);
 	}
-
 	static int compare(const void* a, const void* b) {
 		return (intptr_t)a - (intptr_t)b;
 	}

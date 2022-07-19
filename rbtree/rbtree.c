@@ -245,7 +245,11 @@ RBNode* paint_child_red(RBNode* node, int side) {
 void* RBremove(RBTree* tree, void* key) {
 	int how;
 	RBIter* iter = search(tree, key, &how);
-	if (how != 0) return NULL;
+	if (iter == NULL) return NULL;
+	if (how != 0) {
+		RBiter_release(iter);
+		return NULL;
+	}
 	RBNode * node = iter->elt[iter->curdepth].node;
 	void *data = node->data;
 	void** old = &(node->data);
@@ -315,6 +319,7 @@ void* RBremove(RBTree* tree, void* key) {
 			}
 		}
 	}
+	RBiter_release(iter);
 	// handle a possible red root
 	if (tree->root && tree->root->red) {
 		tree->root->red = 0;
