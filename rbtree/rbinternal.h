@@ -1,8 +1,8 @@
 #ifndef RBINTERNAL_H
 #define RBINTERNAL_H
 
-#include "rbtree.h"
 #include <stdint.h>
+#include "rbtree.h"
 
 struct _RBNode {
 	void* data;

@@ -4,6 +4,36 @@ extern "C" {
 #include "rbinternal.h"
 }
 
+
+_RBNode* build_node(_RBNode* nodes) {
+	if (nodes == nullptr) return nullptr;
+	_RBNode* node = (RBNode*)malloc(sizeof(*node));
+	if (node == nullptr) return nullptr;
+	node->data = nodes->data;
+	node->red = nodes->red;
+	for (int i = 0; i < 2; i++) {
+		node->child[i] = build_node(nodes->child[i]);
+	}
+	return node;
+}
+
+_RBNode* back(_RBNode *node, _RBNode* nodes, int nb) {
+	if (node == nullptr) return nullptr;
+	for (int i = 0; i < nb; i++) {
+		if (nodes[i].data == node->data) {
+			nodes[i].red = node->red;
+			for (int j = 0; j < 2; j++) {
+				nodes[i].child[j] = back(node->child[j], nodes, nb);
+			}
+			return nodes + i;
+		}
+	}
+	for (int j = 0; j < 2; j++) {
+		back(node->child[j], nodes, nb);
+	}
+	return node;
+}
+
 class TestInsertImpl : public ::testing::Test {
 protected:
 	RBTree tree;
@@ -11,6 +41,11 @@ protected:
 	TestInsertImpl() {
 		RBinit(&tree, compare);
 	}
+
+	void TearDown() {
+		RBdestroy(&tree, nullptr);
+	}
+
 	static int compare(const void* a, const void* b) {
 		return (intptr_t)a - (intptr_t)b;
 	}
@@ -24,10 +59,11 @@ TEST_F(TestInsertImpl, SwapRed) {
 		{(void*)4, {nodes + 2, nodes + 4}, 0},
 		{(void*)6, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 2;
 	tree.count = 5;
 	EXPECT_EQ(nullptr, RBinsert(&tree, (void*)5, nullptr));
+	back(tree.root, nodes, sizeof(nodes)/sizeof(*nodes));
 	EXPECT_EQ(1, nodes[3].red);
 	EXPECT_EQ(0, nodes[2].red);
 	EXPECT_EQ(0, nodes[4].red);
@@ -42,10 +78,11 @@ TEST_F(TestInsertImpl, SimpleRotation) {
 		{(void*)3, {nullptr, nodes + 3}, 0},
 		{(void*)4, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 2;
 	tree.count = 4;
 	EXPECT_EQ(nullptr, RBinsert(&tree, (void*)5, nullptr));
+	back(tree.root, nodes, sizeof(nodes) / sizeof(*nodes));
 	EXPECT_EQ(nodes[1].child[1], nodes + 3);
 	EXPECT_EQ(nodes[3].child[0], nodes + 2);
 	ASSERT_NE(nullptr, nodes[3].child[1]);
@@ -61,16 +98,17 @@ TEST_F(TestInsertImpl, DoubleRotation) {
 		{(void*)3, {nullptr, nodes + 3}, 0},
 		{(void*)5, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 2;
 	tree.count = 4;
 	EXPECT_EQ(nullptr, RBinsert(&tree, (void*)4, nullptr));
+	back(tree.root, nodes, sizeof(nodes) / sizeof(*nodes));
 	ASSERT_NE(nullptr, nodes[1].child[1]);
 	EXPECT_EQ((void*)4, nodes[1].child[1]->data);
 	EXPECT_EQ(0, nodes[1].child[1]->red);
 	EXPECT_EQ(1, nodes[3].red);
-	EXPECT_EQ(nodes + 2, nodes[1].child[1]->child[0]);
-	EXPECT_EQ(nodes + 3, nodes[1].child[1]->child[1]);
+	EXPECT_EQ(nodes[2].data, nodes[1].child[1]->child[0]->data);
+	EXPECT_EQ(nodes[3].data, nodes[1].child[1]->child[1]->data);
 	EXPECT_EQ(nullptr, nodes[2].child[0]);
 	EXPECT_EQ(0, RBvalidate(&tree));
 }
@@ -81,11 +119,12 @@ TEST_F(TestInsertImpl, RedRoot) {
 		{(void*)2, {nodes, nodes + 2}, 0},
 		{(void*)3, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes+1;
+	tree.root = build_node(nodes+1);
 	tree.black_depth = 1;
 	tree.count = 3;
 	EXPECT_EQ(nullptr, RBinsert(&tree, (void*)4, nullptr));
-	EXPECT_EQ(nodes + 1, tree.root);
+	back(tree.root, nodes, sizeof(nodes) / sizeof(*nodes));
+	EXPECT_EQ(nodes[1].data, tree.root->data);
 	EXPECT_EQ(nodes, nodes[1].child[0]);
 	EXPECT_EQ(2, tree.black_depth);
 	EXPECT_EQ(0, nodes[0].red);
@@ -98,6 +137,10 @@ protected:
 
 	TestValidate() {
 		RBinit(&tree, compare);
+	}
+
+	void TearDown() {
+		RBdestroy(&tree, nullptr);
 	}
 
 	static int compare(const void* a, const void* b) {
@@ -114,7 +157,7 @@ TEST_F(TestValidate, BadDepth) {
 	_RBNode nodes[] = {
 		{nullptr,  {nullptr, nullptr}, 0},
 	};
-	tree.root = nodes;
+	tree.root = build_node(nodes);
 	tree.black_depth = 0;
 	EXPECT_EQ(DEPTH_ERROR, RBvalidate(&tree));
 	tree.black_depth = 2;
@@ -125,7 +168,7 @@ TEST_F(TestValidate, RedRoot) {
 	_RBNode nodes[] = {
 		{nullptr,  {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes;
+	tree.root = build_node(nodes);
 	tree.black_depth = 1;
 	EXPECT_EQ(RED_ROOT, RBvalidate(&tree));
 }
@@ -139,7 +182,7 @@ TEST_F(TestValidate, RedViolation) {
 		{(void*)5,  {nullptr, nodes + 5}, 1},
 		{(void*)6,  {nullptr, nullptr}, 0},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 1;
 	tree.count = 6;
 	EXPECT_EQ(RED_VIOLATION, RBvalidate(&tree));
@@ -154,7 +197,7 @@ TEST_F(TestValidate, BlackViolation) {
 		{(void*)5,  {nullptr, nodes + 5}, 1},
 		{(void*)6,  {nullptr, nullptr}, 0},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 1;
 	tree.count = 6;
 	EXPECT_EQ(BLACK_VIOLATION, RBvalidate(&tree));
@@ -168,6 +211,10 @@ protected:
 		RBinit(&tree, compare);
 	}
 
+	void TearDown() {
+		RBdestroy(&tree, nullptr);
+	}
+
 	static int compare(const void* a, const void* b) {
 		return (intptr_t)a - (intptr_t)b;
 	}
@@ -179,7 +226,7 @@ TEST_F(TestRemoveImpl, test_123) {
 		{(void*)2, {nodes, nodes + 2}, 0},
 		{(void*)3, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 1;
 	tree.count = 3;
 	ASSERT_EQ(0, RBvalidate(&tree));
@@ -197,7 +244,7 @@ TEST_F(TestRemoveImpl, test_321) {
 		{(void*)2, {nodes, nodes + 2}, 0},
 		{(void*)3, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 1;
 	tree.count = 3;
 	ASSERT_EQ(0, RBvalidate(&tree));
@@ -215,7 +262,7 @@ TEST_F(TestRemoveImpl, test_231) {
 		{(void*)2, {nodes, nodes + 2}, 0},
 		{(void*)3, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 1;
+	tree.root = build_node(nodes + 1);
 	tree.black_depth = 1;
 	tree.count = 3;
 	ASSERT_EQ(0, RBvalidate(&tree));
@@ -245,14 +292,14 @@ TEST_F(TestRemoveImpl, red_ancestor_simple) {
 		{(void*)14, {nodes + 12, nodes + 14}, 0},
 		{(void*)15, {nullptr, nullptr}, 1},
 	};
-	tree.root = nodes + 7;
+	tree.root = build_node(nodes + 7);
 	tree.black_depth = 3;
 	tree.count = 15;
 	ASSERT_EQ(0, RBvalidate(&tree));
 	EXPECT_EQ((void*)5, RBremove(&tree, (void*)5));
 	ASSERT_EQ(0, RBvalidate(&tree));
 	EXPECT_EQ(3, tree.black_depth);
-	EXPECT_EQ(nodes + 7, tree.root);
+	EXPECT_EQ(nodes[7].data, tree.root->data);
 }
 
 TEST_F(TestRemoveImpl, red_ancestor_rotation) {
@@ -273,14 +320,16 @@ TEST_F(TestRemoveImpl, red_ancestor_rotation) {
 		{(void*)14, {nodes + 12, nodes + 14}, 0},
 		{(void*)15, {nullptr, nullptr}, 0},
 	};
-	tree.root = nodes + 11;
+	tree.root = build_node(nodes + 11);
 	tree.black_depth = 3;
 	tree.count = 15;
 	ASSERT_EQ(0, RBvalidate(&tree));
 	EXPECT_EQ((void*)5, RBremove(&tree, (void*)5));
+	back(tree.root, nodes, sizeof(nodes) / sizeof(*nodes));
+
 	ASSERT_EQ(0, RBvalidate(&tree));
 	EXPECT_EQ(3, tree.black_depth);
-	EXPECT_EQ(nodes + 11, tree.root);
+	EXPECT_EQ(nodes[11].data, tree.root->data);
 	EXPECT_EQ(nodes + 3, nodes[11].child[0]);
 }
 

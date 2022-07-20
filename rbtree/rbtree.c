@@ -2,10 +2,12 @@
 #define EXPORT __declspec(dllexport)
 #endif
 
-#include "rbtree.h"
-#include "rbinternal.h"
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "rbtree.h"
+#include "rbinternal.h"
 
 
 static RBIter* search(RBTree* tree, void* data, int* how) {
@@ -244,6 +246,8 @@ RBNode* paint_child_red(RBNode* node, int side) {
 
 void* RBremove(RBTree* tree, void* key) {
 	int how;
+	RBNode* to_del = NULL;
+
 	RBIter* iter = search(tree, key, &how);
 	if (iter == NULL) return NULL;
 	if (how != 0) {
@@ -268,10 +272,12 @@ void* RBremove(RBTree* tree, void* key) {
 		child = node->child[0];
 	}
 	if (0 == iter->curdepth) {
+		to_del = node;
 		tree->root = child;
 		tree->black_depth -= 1;
 	}
 	else {
+		to_del = node;
 		iter->elt[iter->curdepth - 1].node->child[iter->elt[
 			iter->curdepth].right] = child
 		;
@@ -326,6 +332,7 @@ void* RBremove(RBTree* tree, void* key) {
 		tree->black_depth += 1;
 	}
 	tree->count -= 1;
+	free(to_del);
 	return data;
 }
 

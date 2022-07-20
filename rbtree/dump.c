@@ -2,11 +2,13 @@
 #define EXPORT __declspec(dllexport)
 #endif
 
-#include "rbtree.h"
-#include "rbinternal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
+
+#include "rbtree.h"
+#include "rbinternal.h"
 
 struct Elt {
 	RBNode* node;
@@ -63,6 +65,7 @@ int RBdump(RBTree* tree, size_t elt_width, void(*dump)(void*, char*)) {
 			iter->curdepth)) {
 			RBiter_release(iter);
 			free(buff);
+			free(list.elt);
 			return 0;
 		}
 		if (NULL == RBnext(iter) || iter->curdepth < 0) break;
@@ -87,5 +90,8 @@ int RBdump(RBTree* tree, size_t elt_width, void(*dump)(void*, char*)) {
 		fputs(buff, stderr);
 		curpos++;
 	}
+	RBiter_release(iter);
+	free(list.elt);
+	free(buff);
 	return 0;
 }
