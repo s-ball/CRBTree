@@ -48,6 +48,11 @@ The library consists of only 2 source files (`rbtree.c` for almost everything
 The recommended usage is then to just add those files to your project and
  include `rbtree.h` in any file using the library.
 
+A specific case in current version is the `EXPORT` macro. It allows the
+automatic generation of an import library on Microsort Visual Studio. On 
+a different system, it make probably sense to define `EXPORT` to be an
+empty string (what I currently do to build the library on Ubuntu).
+
 ### Developper usage
 
 Because of the liberal MIT license, you are allowed to use and modify this
@@ -72,9 +77,13 @@ This project uses a standard Major.Minor.Patch versioning pattern. Inside
  a major version, public API stability is expected (at least after 1.0.0
  version will be published).
 
+Unfortunately, the version is only accurate for a Git *tagged* release. On
+any other commit, you can only expect to be *close* to what the release
+actually is.
+
 ## License
-This project is licensed under the MIT License - see the LICENSE.txt file
- for details
+This project is licensed under the MIT License - see the
+[LICENSE.txt](LICENSE.TXT) file for details.
 
 ## Acknowledgements:
 

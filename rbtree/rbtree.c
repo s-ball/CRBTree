@@ -12,6 +12,11 @@
 
 extern const unsigned char RBVERSION[];
 
+/**
+ * @brief Returns the current library version as 4 bytes.
+ * 
+ * @return a pointer to a 4 bytes array major, minor, patch, level
+*/
 const unsigned char* RBversion() {
 	return RBVERSION;
 }
