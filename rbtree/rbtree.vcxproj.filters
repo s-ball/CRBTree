@@ -29,5 +29,8 @@
     <ClCompile Include="dump.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="rbversion.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

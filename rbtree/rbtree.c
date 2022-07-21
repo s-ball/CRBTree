@@ -10,6 +10,12 @@
 #include "rbinternal.h"
 
 
+extern const unsigned char RBVERSION[];
+
+const unsigned char* RBversion() {
+	return RBVERSION;
+}
+
 static RBIter* search(RBTree* tree, void* data, int* how) {
 	if (0 == tree->black_depth) return NULL;
 	int md = 1 + 2 * tree->black_depth;

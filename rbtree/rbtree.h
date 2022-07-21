@@ -15,6 +15,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	// Current version
+	EXPORT const unsigned char* RBversion();
 
 	// Some opaque structures
 	typedef struct _RBNode RBNode;

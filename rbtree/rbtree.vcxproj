@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="dump.c" />
     <ClCompile Include="rbtree.c" />
+    <ClCompile Include="rbversion.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

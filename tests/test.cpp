@@ -188,3 +188,15 @@ TEST_F(TestSearch, NotFound) {
 	ASSERT_EQ(nullptr, RBnext(iter));
 	RBiter_release(iter);
 }
+
+TEST(TestVersion, NotNull) {
+	const unsigned char* version = RBversion();
+	int null = 1;
+	for (int i = 0; i < 4; i++) {
+		if (0 != version[i]) {
+			null = 0;
+			break;
+		}
+	}
+	ASSERT_EQ(0, null);
+}
