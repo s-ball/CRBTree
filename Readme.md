@@ -65,6 +65,10 @@ or incompatibilitis should be soon detected.
 The tests files currently show no memory leak using 
 [Valgrind](https://valgrind.org/).
 
+### Public API
+
+The public API is documented on the [API.md](API.md) page.
+
 ## Contributions
 
 I will be glad to recieve issues in GitHUB, either for current problems or

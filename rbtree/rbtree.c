@@ -412,7 +412,7 @@ void* RBremove(RBTree* tree, void* key) {
 	return data;
 }
 
-/**
+/* *
  * @brief Inserts an array of elements into a valid tree.
  *
  * Inserts a number of elements in one single call. The returned value
@@ -425,7 +425,7 @@ void* RBremove(RBTree* tree, void* key) {
  * @param n : number of elements in data
  * @param dele : an optional function to release replaced elements or NULL
  * @return : the number of new elements inserted in the tree
-*/
+*//*
 size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 	void (*dele)(const void *)) {
 	int inserted = 0, err;
@@ -437,6 +437,7 @@ size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 	}
 	return inserted;
 }
+*/
 
 static int node_validate(RBNode *node, int *total, int (*comp)(const void *, const void *)) {
 	int child_level[2];

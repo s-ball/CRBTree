@@ -59,9 +59,11 @@ extern "C" {
 	// Completely cleans a tree.
 	EXPORT void RBdestroy(RBTree* tree, void (*dele)(const void*));
 
+	/*
 	// Inserts an array of elements into a valid tree.
 	EXPORT size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 		void (*dele)( const void *));
+	*/
 
 	// Validates a tree.
 	EXPORT int RBvalidate(RBTree* tree);
