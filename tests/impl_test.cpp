@@ -4,36 +4,37 @@ extern "C" {
 #include "rbinternal.h"
 }
 
+namespace {
 
-_RBNode* build_node(_RBNode* nodes) {
-	if (nodes == nullptr) return nullptr;
-	_RBNode* node = (RBNode*)malloc(sizeof(*node));
-	if (node == nullptr) return nullptr;
-	node->data = nodes->data;
-	node->red = nodes->red;
-	for (int i = 0; i < 2; i++) {
-		node->child[i] = build_node(nodes->child[i]);
-	}
-	return node;
-}
-
-_RBNode* back(_RBNode *node, _RBNode* nodes, int nb) {
-	if (node == nullptr) return nullptr;
-	for (int i = 0; i < nb; i++) {
-		if (nodes[i].data == node->data) {
-			nodes[i].red = node->red;
-			for (int j = 0; j < 2; j++) {
-				nodes[i].child[j] = back(node->child[j], nodes, nb);
-			}
-			return nodes + i;
+	_RBNode* build_node(_RBNode* nodes) {
+		if (nodes == nullptr) return nullptr;
+		_RBNode* node = (RBNode*)malloc(sizeof(*node));
+		if (node == nullptr) return nullptr;
+		node->data = nodes->data;
+		node->red = nodes->red;
+		for (int i = 0; i < 2; i++) {
+			node->child[i] = build_node(nodes->child[i]);
 		}
+		return node;
 	}
-	for (int j = 0; j < 2; j++) {
-		back(node->child[j], nodes, nb);
-	}
-	return node;
-}
 
+	_RBNode* back(_RBNode* node, _RBNode* nodes, int nb) {
+		if (node == nullptr) return nullptr;
+		for (int i = 0; i < nb; i++) {
+			if (nodes[i].data == node->data) {
+				nodes[i].red = node->red;
+				for (int j = 0; j < 2; j++) {
+					nodes[i].child[j] = back(node->child[j], nodes, nb);
+				}
+				return nodes + i;
+			}
+		}
+		for (int j = 0; j < 2; j++) {
+			back(node->child[j], nodes, nb);
+		}
+		return node;
+	}
+}
 class TestInsertImpl : public ::testing::Test {
 protected:
 	RBTree tree;
@@ -47,7 +48,7 @@ protected:
 	}
 
 	static int compare(const void* a, const void* b) {
-		return (intptr_t)a - (intptr_t)b;
+		return (int)(intptr_t)a - (int)(intptr_t)b;
 	}
 };
 
@@ -144,7 +145,7 @@ protected:
 	}
 
 	static int compare(const void* a, const void* b) {
-		return (intptr_t)a - (intptr_t)b;
+		return (int)(intptr_t)a - (int)(intptr_t)b;
 	}
 };
 
@@ -203,6 +204,18 @@ TEST_F(TestValidate, BlackViolation) {
 	EXPECT_EQ(BLACK_VIOLATION, RBvalidate(&tree));
 }
 
+TEST_F(TestValidate, OrderError) {
+	_RBNode nodes[] = {
+		{(void*)1,  {nullptr, nullptr}, 0},
+		{(void*)3,  {nodes, nodes + 2}, 0},
+		{(void*)2,  {nullptr, nullptr}, 0},
+	};
+	tree.root = build_node(nodes + 1);
+	tree.black_depth = 2;
+	tree.count = 3;
+	EXPECT_EQ(ORDER_ERROR, RBvalidate(&tree));
+}
+
 class TestRemoveImpl : public ::testing::Test {
 protected:
 	RBTree tree;
@@ -216,7 +229,7 @@ protected:
 	}
 
 	static int compare(const void* a, const void* b) {
-		return (intptr_t)a - (intptr_t)b;
+		return (int)(intptr_t)a - (int)(intptr_t)b;
 	}
 };
 
@@ -346,7 +359,7 @@ protected:
 	}
 
 	static int compare(const void* a, const void* b) {
-		return (intptr_t)a - (intptr_t)b;
+		return (int)(intptr_t)a - (int)(intptr_t)b;
 	}
 };
 

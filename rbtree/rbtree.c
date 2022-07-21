@@ -38,27 +38,84 @@ static RBIter* search(RBTree* tree, void* data, int* how) {
 	return iter;
 }
 
+/**
+ * @brief Searches a tree from a key and returns an iterator positioned there.
+ * 
+ * If the key is found in the tree, the next call of `RBnext` on the iterator
+ * will return the element for that key. If it is not found, the next call will
+ * return the first element with a greater key.
+ * 
+ * @param tree : the tree where the key is searched
+ * @param key : the key to be searched
+ * @return : an iterator positioned at that key
+*/
+RBIter* RBsearch(RBTree* tree, void* key) {
+	int how;
+	RBIter* iter = search(tree, key, &how);
+	if (iter == NULL) {
+		return NULL;
+	}
+	if (how > 0) {
+		RBnext(iter);
+	}
+	return iter;
+}
+
+
+// 
+
+/**
+ * @brief Finds an element from a tree and returns it if found or returns NULL.
+ * @param tree : the tree where the key is searched
+ * @param key : the key to be searched
+ * @return : the element for that key
+*/
+EXPORT void* RBfind(RBTree* tree, void* key) {
+	int how;
+	RBIter* iter = search(tree, key, &how);
+	void* data = ((iter == NULL) || (how != 0)) ? NULL :
+		iter->elt[iter->curdepth].node->data;
+	RBiter_release(iter);
+	return data;
+}
+
 static void iter_push(RBIter* iter, RBNode* node, int side) {
 	iter->elt[++iter->curdepth].node = node;
 	iter->elt[iter->curdepth].right = side;
 }
 
+/**
+ * @brief Builds an iterator pointing to the first element.
+ * 
+ * @param tree : the tree which is to be iterated
+ * @return : and iterator pointing to the first element of the tree
+*/
 RBIter* RBfirst(RBTree* tree) {
-	if (0 == tree->black_depth) return NULL;
 	int md = 1 + 2 * tree->black_depth;
 	RBIter* iter = malloc(sizeof(RBIter) + md * sizeof(struct iter_elt));
 	if (NULL == iter) return NULL;
 	RBNode* curr = tree->root;
-	for (int i = 0; i < md; i++) {
-		iter->elt[i].node = curr;
-		iter->elt[i].right = 0;
-		iter->curdepth = i;
-		if (curr->child[0]) curr = curr->child[0];
-		else break;
+	if (curr == NULL) {
+		iter->curdepth = -1;
+	}
+	else {
+		for (int i = 0; i < md; i++) {
+			iter->elt[i].node = curr;
+			iter->elt[i].right = 0;
+			iter->curdepth = i;
+			if (curr->child[0]) curr = curr->child[0];
+			else break;
+		}
 	}
 	return iter;
 }
 
+/**
+ * @brief : Returns the currently pointed element and advances the iterator.
+ * 
+ * @param iter : the iterator
+ * @return : the currently pointed element
+*/
 void* RBnext(RBIter* iter) {
 	if (iter->curdepth == -1) return NULL;
 	RBNode* node = iter->elt[iter->curdepth].node;
@@ -76,6 +133,7 @@ void* RBnext(RBIter* iter) {
 	}
 	return data;
 }
+
 static RBNode* new_node(void* data) {
 	RBNode* node = malloc(sizeof(*node));
 	if (NULL != node) {
@@ -133,8 +191,8 @@ static RBNode* fix_red_violation(RBIter* iter, int side) {
  * @brief Initializes a new tree given a comparison function.
  *
  * Initialization makes a valid empty tree: the root node is set to NULL,
- * the black depth to 0 and the comparison function pointer points to the
- * passed function.
+ * the black depth and the count to 0 and the comparison function pointer
+ * points to the passed function.
  *
  * @param tree : pointer to the RBTree to initialize
  * @param comp : the comparison function
@@ -147,7 +205,7 @@ void RBinit(RBTree* tree, int (*comp)(const void*, const void*)) {
 }
 
 /**
- * @brief Release all resources associated with an iterator.
+ * @brief Releases all resources associated with an iterator.
  *
  * @param iter : the iterator to release
 */
@@ -169,8 +227,8 @@ static void node_destroy(RBNode* node, void (*dele)(const void *)) {
  * RBdestroy removes all nodes from a tree and if dele is not null, applies
  * if to any referenced element (intended to free the elements resources).
  *
- * @param tree
- * @param dele
+ * @param tree : the tree do clean
+ * @param dele : an optional function that would be applied on evey element
 */
 void RBdestroy(RBTree* tree, void (*dele)(const void*)) {
 	node_destroy(tree->root, dele);
@@ -244,6 +302,13 @@ RBNode* paint_child_red(RBNode* node, int side) {
 	return node;
 }
 
+/**
+ * @brief Removes an element from a tree and returns it.
+ * 
+ * @param tree : the tree to search
+ * @param key : the key for which an element is to be retrieved
+ * @return : NULL if the key could not be found or the removed element
+*/
 void* RBremove(RBTree* tree, void* key) {
 	int how;
 	RBNode* to_del = NULL;
@@ -386,7 +451,7 @@ static int node_validate(RBNode *node, int *total, int (*comp)(const void *, con
  * @brief Validates a tree.
  *
  * RBvalidate controls that a tree is correctly ordered, contains neither
- * red nor black violation and that its black_depth is correct.
+ * red nor black violation and that its black_depth and count are correct.
  *
  * @param tree : the tree to validate
  * @return : 0 if the tree is correct or a (non-zero) error code

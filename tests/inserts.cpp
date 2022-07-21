@@ -19,11 +19,11 @@ protected:
 	}
 
 	static int compare(const void* a, const void* b) {
-		return (intptr_t)a - (intptr_t)b;
+		return (int)(intptr_t)a - (int)(intptr_t)b;
 	}
 
 	static void dele(const void* data) {
-		EXPECT_EQ((void*) expect_dele.front(), data);
+		EXPECT_EQ((void*) (intptr_t) expect_dele.front(), data);
 		expect_dele.pop_front();
 	}
 };
@@ -40,7 +40,7 @@ TEST_F(TestInsert, test_1) {
 TEST_F(TestInsert, test_bunch_red_levels) {
 	int arr[] = { 8, 6, 10, 4, 2, 14, 12, 1, 5, 9, 13 };
 	for (int i : arr) {
-		EXPECT_EQ(nullptr, RBinsert(&tree, (void*)i, nullptr));
+		EXPECT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)i, nullptr));
 		ASSERT_EQ(0, RBvalidate(&tree));
 	}
 	EXPECT_EQ(2, tree.black_depth);

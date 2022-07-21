@@ -39,10 +39,17 @@ extern "C" {
 	// Removes an element from a tree and returns it
 	EXPORT void* RBremove(RBTree* tree, void* key);
 
+	// Finds an element from a tree and returns it if found or returns NULL
 	EXPORT void* RBfind(RBTree* tree, void* key);
+
+	// Searches a tree from a key and returns an iterator positioned there
 	EXPORT RBIter* RBsearch(RBTree* tree, void* key);
-	EXPORT void* RBnext(RBIter* iter);
+
+	// Gets an iterator positioned at the first element of a tree
 	EXPORT RBIter* RBfirst(RBTree* tree);
+
+	// Gets next element from an iterator (returns NULL at the end)
+	EXPORT void* RBnext(RBIter* iter);
 
 	// Release all resources associated with an iterator.
 	EXPORT void RBiter_release(RBIter* iter);

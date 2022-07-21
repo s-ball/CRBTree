@@ -20,27 +20,17 @@ struct EltList {
 	struct Elt* elt;
 	size_t sz;
 	size_t count;
-	size_t curpos;
+	int curpos;
 };
 
-static int store(struct EltList* lst, RBNode* node, int depth) {
-	if (lst->count == lst->sz) {
-		lst->sz *= 2;
-		struct Elt* tmp = realloc(lst->elt, lst->sz * sizeof(struct Elt));
-		if (tmp == NULL) {
-			free(lst->elt);
-			return lst->sz;
-		}
-		lst->elt = tmp;
-	}
+static void store(struct EltList* lst, RBNode* node, int depth) {
 	struct Elt* elt = lst->elt + lst->count++;
 	elt->node = node;
 	elt->pos = lst->curpos++;
 	elt->depth = depth;
-	return 0;
 }
 
-static int cmp(void *a, void *b) {
+static int cmp(const void *a, const void *b) {
 	struct Elt* x = (struct Elt*)a;
 	struct Elt* y = (struct Elt*)b;
 	if (x->depth < y->depth) return -1;
@@ -56,18 +46,13 @@ int RBdump(RBTree* tree, size_t elt_width, void(*dump)(void*, char*)) {
 	memset(blank, ' ', elt_width);
 	blank[elt_width] = 0;
 	struct EltList list = { 0 };
-	list.sz = 16;
+	list.sz = tree->count;
 	list.elt = malloc(list.sz * sizeof(*list.elt));
 	RBIter* iter = RBfirst(tree);
 	if (iter == NULL) return 0;
 	for (;;) {
-		if (0 != store(&list, iter->elt[iter->curdepth].node,
-			iter->curdepth)) {
-			RBiter_release(iter);
-			free(buff);
-			free(list.elt);
-			return 0;
-		}
+		store(&list, iter->elt[iter->curdepth].node,
+			iter->curdepth);
 		if (NULL == RBnext(iter) || iter->curdepth < 0) break;
 	}
 	qsort(list.elt, list.count,
@@ -85,7 +70,7 @@ int RBdump(RBTree* tree, size_t elt_width, void(*dump)(void*, char*)) {
 		}
 		dump(list.elt[i].node->data, buff);
 		buff[elt_width] = 0;
-		for (int j = strlen(buff); j < elt_width; j++) buff[j] = ' ';
+		for (size_t j = strlen(buff); j < elt_width; j++) buff[j] = ' ';
 		if (list.elt[i].node->red) buff[elt_width - 1] = '*';
 		fputs(buff, stderr);
 		curpos++;
