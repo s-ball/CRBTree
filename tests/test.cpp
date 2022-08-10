@@ -226,4 +226,5 @@ TEST(TestComp3, insert) {
 		EXPECT_NE(0, err);
 	}
 	EXPECT_EQ(3, tree.count);
+	RBdestroy(&tree, nullptr);
 }

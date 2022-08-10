@@ -12,6 +12,8 @@
 #define ORDER_ERROR 5
 #define COUNT_ERROR 6
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

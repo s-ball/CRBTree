@@ -34,6 +34,11 @@ The library allows to:
 * destroy a whole tree in a single operation and optionaly release its
  elements if passed a deleting function
 
+To allow a simpler usage to build native extensions for other languages,
+for example a C extension for Python, the library can use a comparison
+function taking a third argument (a pointer to integer) to signal
+abnormal conditions like non comparable objects.
+
 Bulk insertions from an array of elements or from another tree should be
 added in a future version.
 
@@ -41,12 +46,13 @@ added in a future version.
 
 ### End user usage:
 
-The library consists of only 2 source files (`rbtree.c` for almost everything
- and `dump.c` for the *dump* feature) and 2 include files, of which only one
+The library consists of only 3 source files (`rbtree.c` for almost everything,
+  `dump.c` for the *dump* feature, and `version.c` for version handling) and 2 include files, of which only one
  (`rbtree.h`) is to be included in source files willing to use the library.
 
 The recommended usage is then to just add those files to your project and
- include `rbtree.h` in any file using the library.
+ include `rbtree.h` in any file using the library. If you do not need the
+ dump feature, you can safely ignore the `dump.c` file.
 
 A specific case in current version is the `EXPORT` macro. It allows the
 automatic generation of an import library on Microsort Visual Studio. On 

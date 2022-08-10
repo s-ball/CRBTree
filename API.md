@@ -67,6 +67,23 @@ Parameters
 *    tree	: pointer to the RBTree to initialize
 *    comp	: the comparison function
 
+### RBinit2
+
+```
+void RBinit 	( 	RBTree *  	tree,
+		int(*)(const void *, const void *, int *)  	comp 
+	) 		
+```
+
+Initializes a new tree given a comparison function handling errors.
+
+Initialization makes a valid empty tree: the root node is set to `NULL`, the black depth and the count to 0 and the 3 args comparison function pointer points to the passed function.
+
+Parameters
+
+*    tree	: pointer to the RBTree to initialize
+*    comp	: the comparison function
+
 ### RBinsert
 
 ```
