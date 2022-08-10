@@ -28,10 +28,15 @@ static RBIter* search(RBTree* tree, void* data, int* how) {
 	if (NULL == iter) return NULL;
 	RBNode* curr = tree->root;
 	int_fast8_t side = 0;
+	int err = 0;
 	for (int i = 0; i < md; i++) {
 		iter->elt[i].node = curr;
 		iter->elt[i].right = side;
-		int next = tree->comp(data, curr->data);
+		int next = tree->comperr(data, curr->data, &err, tree->comp);
+		if (err != 0) {
+			free(iter);
+			return NULL;
+		}
 		if (0 == next) {
 			iter->curdepth = i;
 			*how = 0;
@@ -198,6 +203,14 @@ static RBNode* fix_red_violation(RBIter* iter, int side) {
 	return iter->elt[0].node;
 }
 
+static int defcomp2(const void* a, const void* b, int* err,
+		int (*comp)()) {
+	return comp(a, b);
+}
+
+static int defcomp3(const void* a, const void* b, int* err, int (*comp)()) {
+	return comp(a, b, err);
+}
 /**
  * @brief Initializes a new tree given a comparison function.
  *
@@ -213,6 +226,25 @@ void RBinit(RBTree* tree, int (*comp)(const void*, const void*)) {
 	tree->black_depth = 0;
 	tree->count = 0;
 	tree->comp = comp;
+	tree->comperr = defcomp2;
+}
+
+/**
+ * @brief Initializes a new tree given a comparison function handling errors.
+ *
+ * Initialization makes a valid empty tree: the root node is set to NULL,
+ * the black depth and the count to 0 and the 3 args comparison function pointer
+ * points to the passed function.
+ *
+ * @param tree : pointer to the RBTree to initialize
+ * @param comp : the comparison function handling exceptional condition
+*/
+void RBinit2(RBTree* tree, int (*comp)(const void*, const void*, int*)) {
+	tree->root = NULL;
+	tree->black_depth = 0;
+	tree->count = 0;
+	tree->comp = comp;
+	tree->comperr = defcomp3;
 }
 
 /**
@@ -439,18 +471,22 @@ size_t RBbulk_insert(RBTree* tree, void** data, size_t n,
 }
 */
 
-static int node_validate(RBNode *node, int *total, int (*comp)(const void *, const void *)) {
+static int node_validate(RBNode *node, int *total, 
+		int (*comp)(const void *, const void *),
+		int (*comperr)(const void*, const void *, int *,
+			int (*c)(const void *, const void*))) {
 	int child_level[2];
+	int err = 0;
 	*total += 1;
 	for (int i = 0; i < 2; i++) {
 		if (node->child[i] == 0) child_level[i] = 0;
 		else {
 			if (node->red && node->child[i]->red) return -RED_VIOLATION;
-			int delta = comp(node->child[i]->data, node->data);
-			if ((delta >= 0 && 0 == i) || (delta <= 0 && 1 == i)) {
+			int delta = comperr(node->child[i]->data, node->data, &err, comp);
+			if (err || (delta >= 0 && 0 == i) || (delta <= 0 && 1 == i)) {
 				return -ORDER_ERROR;
 			}
-			int lev = node_validate(node->child[i], total, comp);
+			int lev = node_validate(node->child[i], total, comp, comperr);
 			if (lev < 0) return lev;
 			child_level[i] = lev;
 		}
@@ -473,7 +509,7 @@ int RBvalidate(RBTree* tree) {
 	if ((0 == tree->black_depth) || (NULL == tree->root)) return DEPTH_ERROR;
 	if (tree->root->red) return RED_ROOT;
 	int total = 0;
-	int lev = node_validate(tree->root, &total, tree->comp);
+	int lev = node_validate(tree->root, &total, tree->comp, tree->comperr);
 	if (lev < 0) return -lev;
 	if (lev != tree->black_depth) return DEPTH_ERROR;
 	if (total != tree->count) return COUNT_ERROR;

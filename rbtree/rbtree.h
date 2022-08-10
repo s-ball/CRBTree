@@ -27,13 +27,18 @@ extern "C" {
 		RBNode* root;
 		unsigned black_depth;
 		unsigned count;
-		int (*comp)(const void*, const void*);
+		int (*comp)();
+		int (*comperr)(const void*, const void*, int*, int (*comp)());
 	} RBTree;
 
 	// The public interface functions
 
 	// Initializes a new tree given a comparison function.
 	EXPORT void RBinit(RBTree* tree, int (*comp)(const void*, const void*));
+
+	// Initializes a new tree given a comparison function handling exceptional conditions.
+	EXPORT void RBinit2(RBTree* tree, int (*comperr)(const void*, const void*,
+		int*));
 
 	// Inserts a new element into a valid tree and return the previous element with same key if any.
 	EXPORT void *RBinsert(RBTree* tree, void* data, int *error);

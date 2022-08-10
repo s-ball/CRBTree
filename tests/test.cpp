@@ -16,6 +16,13 @@ namespace {
 		return (int)(intptr_t)a - (int)(intptr_t)b;
 	}
 
+	int int_comp_err(const void* a, const void* b, int* err) {
+		if (0 == a || 0 == b) {
+			*err = 1;
+			return 0;
+		}
+		return int_comp(a, b);
+	}
 }
 
 
@@ -25,7 +32,7 @@ TEST(General, rbinit) {
 	RBinit(&tree, stub_comp);
 	EXPECT_EQ(nullptr, tree.root);
 	EXPECT_EQ(0, tree.black_depth);
-	EXPECT_EQ(&stub_comp, tree.comp);
+	EXPECT_EQ((int (*)())(& stub_comp), tree.comp);
 	EXPECT_EQ(0, RBvalidate(&tree));
 }
 
@@ -199,4 +206,24 @@ TEST(TestVersion, NotNull) {
 		}
 	}
 	ASSERT_EQ(0, null);
+}
+
+TEST(TestComp3, rbinit2) {
+	RBTree tree;
+	RBinit2(&tree, int_comp_err);
+	ASSERT_EQ((int (*)()) &int_comp_err, tree.comp);
+}
+
+TEST(TestComp3, insert) {
+	RBTree tree;
+	RBinit2(&tree, int_comp_err);
+	int arr[] = { 1, 2, 3 };
+	for (int i : arr) {
+		int err = 0;
+		EXPECT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t) i, &err));
+		EXPECT_EQ(0, err);
+		EXPECT_EQ(nullptr, RBinsert(&tree, nullptr, &err));
+		EXPECT_NE(0, err);
+	}
+	EXPECT_EQ(3, tree.count);
 }
