@@ -38,6 +38,22 @@ static int cmp(const void *a, const void *b) {
 	return (x->pos - y->pos);
 }
 
+/**
+ * @brief Dumps a tree with parent child relations and node colors.
+ * 
+ * It uses 2 parameters, the width that will be used to display an element
+ * and the function that generates that label. The buffer is internally
+ * managed by RBdump and is passed to the user provided function. Undefined
+ * Behaviour is to be expected if that function writes more than `elt_width`
+ * characters or omits the terminating null...
+ * 
+ * On output, red nodes have their label followed with a `*`.
+ * 
+ * @param tree : the tree to dump
+ * @param elt_width : the width (in characters) used to display an element
+ * @param dump : a user provided function to generate a text label per element
+ * @return 
+*/
 int RBdump(RBTree* tree, size_t elt_width, void(*dump)(void*, char*)) {
 	// TODO: implementation of the function
 	char* buff = malloc(2 * (elt_width + 1));

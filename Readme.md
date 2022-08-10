@@ -69,6 +69,36 @@ The tests files currently show no memory leak using
 
 The public API is documented on the [API.md](API.md) page.
 
+### The `dump.c` file and the `RBdump` function
+
+`RBdump` is a tool to easily display the content of a tree  with parent-child
+dependencies and red/black *color*. It is really dependant to implentation
+details and because of that is not member of the public API. Nevertheless, it
+can be an useful tool if someone wants to develop over this library.
+
+```
+int RBdump ( RBTree* tree, size_t elt_width, void(*dump)(void*, char*))
+```
+
+Dumps a tree with parent child relations and node colors.
+ 
+It uses 2 parameters, the width that will be used to display an element
+and the function that generates that label. The buffer is internally
+managed by RBdump and is passed to the user provided function. Undefined
+Behaviour is to be expected if that function writes more than `elt_width`
+characters or omits the terminating null...
+ 
+On output, red nodes have their label followed with a `*`.
+
+Parameters
+
+* tree : the tree to dump
+* elt_width : the width (in characters) used to display an element
+* dump : a user provided function to generate a text label per element
+
+Returns
+    : 0 if the tree could successfully be dumped
+
 ## Contributions
 
 I will be glad to recieve issues in GitHUB, either for current problems or
@@ -77,7 +107,7 @@ as I am not developping (nor even using) this professionaly, I may sometimes
 not be very reactive.
 
 ## Versioning
-This project uses a standard Major.Minor.Patch versioning pattern. Inside
+This project uses a Major.Minor.Patch[.Sub] versioning pattern. Inside
  a major version, public API stability is expected (at least after 1.0.0
  version will be published).
 
@@ -85,6 +115,10 @@ Unfortunately, the version is only accurate for a Git *tagged* release. On
 any other commit, you can only expect to be *close* to what the release
 actually is.
 
+Currently, the `.Sub` part is never present Git tagged release, and is
+expected to be 0 for those releases. It is intented to increment between
+those releases, with no specific pattern, but even that is not fully
+reliable.
 ## License
 This project is licensed under the MIT License - see the
 [LICENSE.txt](LICENSE.TXT) file for details.
