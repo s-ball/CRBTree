@@ -171,14 +171,14 @@ protected:
 };
 
 TEST_F(TestSearch, AfterLast) {
-	RBIter *iter = RBsearch(&tree, (void*)(intptr_t)15);
+	RBIter *iter = RBsearch(&tree, (void*)(intptr_t)15, NULL);
 	ASSERT_NE(nullptr, iter);
 	ASSERT_EQ(nullptr, RBnext(iter));
 	RBiter_release(iter);
 }
 
 TEST_F(TestSearch, Found) {
-	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)10);
+	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)10, NULL);
 	ASSERT_NE(nullptr, iter);
 	EXPECT_EQ((void*)(intptr_t)10, RBnext(iter));
 	EXPECT_EQ((void*)(intptr_t)12, RBnext(iter));
@@ -187,7 +187,7 @@ TEST_F(TestSearch, Found) {
 	RBiter_release(iter);
 }
 TEST_F(TestSearch, NotFound) {
-	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)9);
+	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)9, NULL);
 	ASSERT_NE(nullptr, iter);
 	EXPECT_EQ((void*)(intptr_t)10, RBnext(iter));
 	EXPECT_EQ((void*)(intptr_t)12, RBnext(iter));

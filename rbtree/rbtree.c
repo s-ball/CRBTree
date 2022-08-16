@@ -21,19 +21,18 @@ const unsigned char* RBversion() {
 	return RBVERSION;
 }
 
-static RBIter* search(RBTree* tree, void* data, int* how) {
+static RBIter* search(RBTree* tree, void* data, int* how, int *err) {
 	if (0 == tree->black_depth) return NULL;
 	int md = 1 + 2 * tree->black_depth;
 	RBIter *iter = malloc(sizeof(RBIter) + md * sizeof(struct iter_elt));
 	if (NULL == iter) return NULL;
 	RBNode* curr = tree->root;
 	int_fast8_t side = 0;
-	int err = 0;
 	for (int i = 0; i < md; i++) {
 		iter->elt[i].node = curr;
 		iter->elt[i].right = side;
-		int next = tree->comperr(data, curr->data, &err, tree->comp);
-		if (err != 0) {
+		int next = tree->comperr(data, curr->data, err, tree->comp);
+		if (err && (* err != 0)) {
 			free(iter);
 			return NULL;
 		}
@@ -65,9 +64,9 @@ static RBIter* search(RBTree* tree, void* data, int* how) {
  * @param key : the key to be searched
  * @return : an iterator positioned at that key
 */
-RBIter* RBsearch(RBTree* tree, void* key) {
+RBIter* RBsearch(RBTree* tree, void* key, int *err) {
 	int how;
-	RBIter* iter = search(tree, key, &how);
+	RBIter* iter = search(tree, key, &how, err);
 	if (iter == NULL) {
 		return NULL;
 	}
@@ -88,7 +87,7 @@ RBIter* RBsearch(RBTree* tree, void* key) {
 */
 EXPORT void* RBfind(RBTree* tree, void* key) {
 	int how;
-	RBIter* iter = search(tree, key, &how);
+	RBIter* iter = search(tree, key, &how, NULL);
 	void* data = ((iter == NULL) || (how != 0)) ? NULL :
 		iter->elt[iter->curdepth].node->data;
 	RBiter_release(iter);
@@ -290,8 +289,7 @@ void RBdestroy(RBTree* tree, void (*dele)(const void*)) {
 */
 void * RBinsert(RBTree* tree, void* data, int *error) {
 	int how;
-	RBIter* iter = search(tree, data, &how);
-	if (error) *error = 1; // be conservative
+	RBIter* iter = search(tree, data, &how, error);
 	if (NULL == iter) {
 		if (tree->black_depth == 0) {
 			tree->root = new_node(data);
@@ -356,7 +354,7 @@ void* RBremove(RBTree* tree, void* key) {
 	int how;
 	RBNode* to_del = NULL;
 
-	RBIter* iter = search(tree, key, &how);
+	RBIter* iter = search(tree, key, &how, NULL);
 	if (iter == NULL) return NULL;
 	if (how != 0) {
 		RBiter_release(iter);

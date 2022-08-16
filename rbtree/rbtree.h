@@ -52,7 +52,7 @@ extern "C" {
 	EXPORT void* RBfind(RBTree* tree, void* key);
 
 	// Searches a tree from a key and returns an iterator positioned there
-	EXPORT RBIter* RBsearch(RBTree* tree, void* key);
+	EXPORT RBIter* RBsearch(RBTree* tree, void* key, int *err);
 
 	// Gets an iterator positioned at the first element of a tree
 	EXPORT RBIter* RBfirst(RBTree* tree);
