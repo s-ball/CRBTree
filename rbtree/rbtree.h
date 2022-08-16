@@ -46,10 +46,10 @@ extern "C" {
 	EXPORT void *RBinsert(RBTree* tree, void* data, int *error);
 
 	// Removes an element from a tree and returns it
-	EXPORT void* RBremove(RBTree* tree, void* key);
+	EXPORT void* RBremove(RBTree* tree, void* key, int *error);
 
 	// Finds an element from a tree and returns it if found or returns NULL
-	EXPORT void* RBfind(RBTree* tree, void* key);
+	EXPORT void* RBfind(RBTree* tree, void* key, int *error);
 
 	// Searches a tree from a key and returns an iterator positioned there
 	EXPORT RBIter* RBsearch(RBTree* tree, void* key, int *err);

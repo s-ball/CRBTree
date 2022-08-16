@@ -85,9 +85,9 @@ RBIter* RBsearch(RBTree* tree, void* key, int *err) {
  * @param key : the key to be searched
  * @return : the element for that key
 */
-EXPORT void* RBfind(RBTree* tree, void* key) {
+EXPORT void* RBfind(RBTree* tree, void* key, int *err) {
 	int how;
-	RBIter* iter = search(tree, key, &how, NULL);
+	RBIter* iter = search(tree, key, &how, err);
 	void* data = ((iter == NULL) || (how != 0)) ? NULL :
 		iter->elt[iter->curdepth].node->data;
 	RBiter_release(iter);
@@ -350,11 +350,11 @@ RBNode* paint_child_red(RBNode* node, int side) {
  * @param key : the key for which an element is to be retrieved
  * @return : NULL if the key could not be found or the removed element
 */
-void* RBremove(RBTree* tree, void* key) {
+void* RBremove(RBTree* tree, void* key, int*err) {
 	int how;
 	RBNode* to_del = NULL;
 
-	RBIter* iter = search(tree, key, &how, NULL);
+	RBIter* iter = search(tree, key, &how, err);
 	if (iter == NULL) return NULL;
 	if (how != 0) {
 		RBiter_release(iter);

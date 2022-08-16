@@ -86,7 +86,7 @@ TEST_F(TestGlobal, nb_run) {
 		}
 		std::shuffle(arr.begin(), arr.end(), rg);
 		for (int i : arr) {
-			ASSERT_EQ((void*)(intptr_t)i, RBremove(&tree, (void*)(intptr_t)i));
+			ASSERT_EQ((void*)(intptr_t)i, RBremove(&tree, (void*)(intptr_t)i, NULL));
 			ASSERT_EQ(0, RBvalidate(&tree));
 		}
 		ASSERT_EQ(0, tree.black_depth);
@@ -141,7 +141,7 @@ TEST_F(TestIntTree, EmptyTree) {
 
 TEST_F(TestIntTree, KeyError) {
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)1, nullptr));
-	EXPECT_EQ(nullptr, RBremove(&tree, (void*)(intptr_t)2));
+	EXPECT_EQ(nullptr, RBremove(&tree, (void*)(intptr_t)2, NULL));
 	EXPECT_EQ(1, tree.count);
 }
 
@@ -156,8 +156,8 @@ TEST_F(TestIntTree, Find) {
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)1, nullptr));
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)2, nullptr));
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)3, nullptr));
-	EXPECT_EQ((void*)(intptr_t)3, RBfind(&tree, (void*)(intptr_t)3));
-	EXPECT_EQ(nullptr, RBfind(&tree, (void*)(intptr_t)4));
+	EXPECT_EQ((void*)(intptr_t)3, RBfind(&tree, (void*)(intptr_t)3, NULL));
+	EXPECT_EQ(nullptr, RBfind(&tree, (void*)(intptr_t)4, NULL));
 }
 
 class TestSearch : public TestIntTree {
