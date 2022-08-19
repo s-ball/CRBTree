@@ -86,7 +86,7 @@ TEST_F(TestGlobal, nb_run) {
 		}
 		std::shuffle(arr.begin(), arr.end(), rg);
 		for (int i : arr) {
-			ASSERT_EQ((void*)(intptr_t)i, RBremove(&tree, (void*)(intptr_t)i, NULL));
+			ASSERT_EQ((void*)(intptr_t)i, RBremove(&tree, (void*)(intptr_t)i));
 			ASSERT_EQ(0, RBvalidate(&tree));
 		}
 		ASSERT_EQ(0, tree.black_depth);
@@ -141,7 +141,7 @@ TEST_F(TestIntTree, EmptyTree) {
 
 TEST_F(TestIntTree, KeyError) {
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)1, nullptr));
-	EXPECT_EQ(nullptr, RBremove(&tree, (void*)(intptr_t)2, NULL));
+	EXPECT_EQ(nullptr, RBremove(&tree, (void*)(intptr_t)2));
 	EXPECT_EQ(1, tree.count);
 }
 
@@ -156,8 +156,8 @@ TEST_F(TestIntTree, Find) {
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)1, nullptr));
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)2, nullptr));
 	ASSERT_EQ(nullptr, RBinsert(&tree, (void*)(intptr_t)3, nullptr));
-	EXPECT_EQ((void*)(intptr_t)3, RBfind(&tree, (void*)(intptr_t)3, NULL));
-	EXPECT_EQ(nullptr, RBfind(&tree, (void*)(intptr_t)4, NULL));
+	EXPECT_EQ((void*)(intptr_t)3, RBfind(&tree, (void*)(intptr_t)3));
+	EXPECT_EQ(nullptr, RBfind(&tree, (void*)(intptr_t)4));
 }
 
 class TestSearch : public TestIntTree {
@@ -171,14 +171,14 @@ protected:
 };
 
 TEST_F(TestSearch, AfterLast) {
-	RBIter *iter = RBsearch(&tree, (void*)(intptr_t)15, NULL);
+	RBIter *iter = RBsearch(&tree, (void*)(intptr_t)15);
 	ASSERT_NE(nullptr, iter);
 	ASSERT_EQ(nullptr, RBnext(iter));
 	RBiter_release(iter);
 }
 
 TEST_F(TestSearch, Found) {
-	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)10, NULL);
+	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)10);
 	ASSERT_NE(nullptr, iter);
 	EXPECT_EQ((void*)(intptr_t)10, RBnext(iter));
 	EXPECT_EQ((void*)(intptr_t)12, RBnext(iter));
@@ -187,7 +187,7 @@ TEST_F(TestSearch, Found) {
 	RBiter_release(iter);
 }
 TEST_F(TestSearch, NotFound) {
-	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)9, NULL);
+	RBIter* iter = RBsearch(&tree, (void*)(intptr_t)9);
 	ASSERT_NE(nullptr, iter);
 	EXPECT_EQ((void*)(intptr_t)10, RBnext(iter));
 	EXPECT_EQ((void*)(intptr_t)12, RBnext(iter));

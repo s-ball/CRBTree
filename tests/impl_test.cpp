@@ -243,11 +243,11 @@ TEST_F(TestRemoveImpl, test_123) {
 	tree.black_depth = 1;
 	tree.count = 3;
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)1, RBremove(&tree, (void*)1, NULL));
+	EXPECT_EQ((void*)1, RBremove(&tree, (void*)1));
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)2, RBremove(&tree, (void*)2, NULL));
+	EXPECT_EQ((void*)2, RBremove(&tree, (void*)2));
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)3, RBremove(&tree, (void*)3, NULL));
+	EXPECT_EQ((void*)3, RBremove(&tree, (void*)3));
 	ASSERT_EQ(0, RBvalidate(&tree));
 }
 
@@ -261,11 +261,11 @@ TEST_F(TestRemoveImpl, test_321) {
 	tree.black_depth = 1;
 	tree.count = 3;
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)3, RBremove(&tree, (void*)3, NULL));
+	EXPECT_EQ((void*)3, RBremove(&tree, (void*)3));
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)2, RBremove(&tree, (void*)2, NULL));
+	EXPECT_EQ((void*)2, RBremove(&tree, (void*)2));
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)1, RBremove(&tree, (void*)1, NULL));
+	EXPECT_EQ((void*)1, RBremove(&tree, (void*)1));
 	ASSERT_EQ(0, RBvalidate(&tree));
 }
 
@@ -279,11 +279,11 @@ TEST_F(TestRemoveImpl, test_231) {
 	tree.black_depth = 1;
 	tree.count = 3;
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)2, RBremove(&tree, (void*)2, NULL));
+	EXPECT_EQ((void*)2, RBremove(&tree, (void*)2));
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)3, RBremove(&tree, (void*)3, NULL));
+	EXPECT_EQ((void*)3, RBremove(&tree, (void*)3));
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)1, RBremove(&tree, (void*)1, NULL));
+	EXPECT_EQ((void*)1, RBremove(&tree, (void*)1));
 	ASSERT_EQ(0, RBvalidate(&tree));
 }
 
@@ -309,7 +309,7 @@ TEST_F(TestRemoveImpl, red_ancestor_simple) {
 	tree.black_depth = 3;
 	tree.count = 15;
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)5, RBremove(&tree, (void*)5, NULL));
+	EXPECT_EQ((void*)5, RBremove(&tree, (void*)5));
 	ASSERT_EQ(0, RBvalidate(&tree));
 	EXPECT_EQ(3, tree.black_depth);
 	EXPECT_EQ(nodes[7].data, tree.root->data);
@@ -337,7 +337,7 @@ TEST_F(TestRemoveImpl, red_ancestor_rotation) {
 	tree.black_depth = 3;
 	tree.count = 15;
 	ASSERT_EQ(0, RBvalidate(&tree));
-	EXPECT_EQ((void*)5, RBremove(&tree, (void*)5, NULL));
+	EXPECT_EQ((void*)5, RBremove(&tree, (void*)5));
 	back(tree.root, nodes, sizeof(nodes) / sizeof(*nodes));
 
 	ASSERT_EQ(0, RBvalidate(&tree));

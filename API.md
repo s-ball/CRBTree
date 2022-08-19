@@ -153,8 +153,7 @@ Returns
 
 ```
 RBIter* RBsearch 	( 	RBTree *  	tree,
-		void *  	key,
-		int *		err
+		void *  	key 
 	) 		
 ```
 
@@ -165,7 +164,6 @@ If the key is found in the tree, the next call of RBnext on the iterator will re
 Parameters
 *    tree	: the tree where the key is searched
 *    key	: the key to be searched
-*    err    : an optional pointer to integer which is set to 1 on error
 
 Returns
 	: an iterator positioned at that key 
