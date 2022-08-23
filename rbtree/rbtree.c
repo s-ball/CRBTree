@@ -279,6 +279,36 @@ void RBdestroy(RBTree* tree, void (*dele)(const void*)) {
 	tree->black_depth = 0;
 }
 
+RBNode* node_clone(RBNode* old, void* (*process)(void* const)) {
+	if (NULL == old) return NULL;
+	RBNode* node = new_node((NULL == process) ?
+		old->data : process(old->data));
+	node->red = old->red;
+	for (int i = 0; i < 2; i++) {
+		node->child[i] = node_clone(old->child[i], process);
+	}
+	return node;
+}
+
+/**
+ * @brief Duplicates a tree.
+ * 
+ * RBclone duplicates a tree by taking a fresh new copy of every node.
+ * Optionaly, an operation can be applied on the data field.
+ * (new_data = process(old_data))
+ * 
+ * @param old : the tree to duplicate 
+ * @param process : an optional function to compute the new data from
+ *                  the old one
+ * @return : a copy of the tree
+*/
+RBTree* RBclone(RBTree* old, void* (*process)(void* const)) {
+	RBTree* tree = malloc(sizeof(*tree));
+	memcpy(tree, old, sizeof(*tree));
+	tree->root = node_clone(old->root, process);
+	return tree;
+}
+
 /**
  * @brief Inserts a new element into a valid tree.
  *

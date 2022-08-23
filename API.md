@@ -1,5 +1,27 @@
 # Function Documentation
 
+
+### RBclone()
+
+```
+RBTree* RBclone 	( 	RBTree *  	old,
+		void *(*)(void *const)  	process 
+	) 		
+```
+
+Duplicates a tree.
+
+`RBclone` duplicates a tree by taking a fresh new copy of every node. Optionaly, an operation can be applied on the data field. (`new_data = process(old_data);`)
+
+Parameters
+
+*    old	: the tree to duplicate
+*    process	: an optional function to compute the new data from the old one
+
+Returns
+    : a copy of the tree 
+
+
 ### RBdestroy()
 
 ```

@@ -228,3 +228,32 @@ TEST(TestComp3, insert) {
 	EXPECT_EQ(3, tree.count);
 	RBdestroy(&tree, nullptr);
 }
+
+class TestClone : public TestIntTree {
+protected:
+	static int count;
+
+	TestClone() : TestIntTree() {
+		count = 0;
+	}
+
+	static void* process(void* const data) {
+		count += 1;
+		return data;
+	}
+};
+
+int TestClone::count;
+
+TEST_F(TestClone, clone15) {
+	for (int i = 1; i <= 15; i++) {
+		RBinsert(&tree, (void*)(intptr_t)i, nullptr);
+	}
+	RBTree* copy = RBclone(&tree, process);
+	EXPECT_EQ(15, count);
+	EXPECT_EQ(15, copy->count);
+	EXPECT_NE(tree.root, copy->root);
+	EXPECT_EQ(0, RBvalidate(copy));
+	RBdestroy(copy, nullptr);
+	free(copy);
+}

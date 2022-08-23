@@ -33,6 +33,7 @@ The library allows to:
 * iterate the tree from the beginning or from a key
 * destroy a whole tree in a single operation and optionaly release its
  elements if passed a deleting function
+* duplicate a tree
 
 To allow a simpler usage to build native extensions for other languages,
 for example a C extension for Python, the library can use a comparison
@@ -66,9 +67,9 @@ source at will. In order to ease development, a number of test files based
 on [Google Test](https://github.com/google/googletest) are provided. The
 current coverage is over 95% (according to
 [llvm-cov](https://llvm.org/docs/CommandGuide/llvm-cov.html)), so regressions 
-or incompatibilitis should be soon detected.
+or incompatibilities should be soon detected.
 
-The tests files currently show no memory leak using 
+The test files currently show no memory leak using 
 [Valgrind](https://valgrind.org/).
 
 ### Public API
@@ -121,10 +122,11 @@ Unfortunately, the version is only accurate for a Git *tagged* release. On
 any other commit, you can only expect to be *close* to what the release
 actually is.
 
-Currently, the `.Sub` part is never present Git tagged release, and is
+Currently, the `.Sub` part is never present on Git tagged release, and is
 expected to be 0 for those releases. It is intented to increment between
 those releases, with no specific pattern, but even that is not fully
 reliable.
+
 ## License
 This project is licensed under the MIT License - see the
 [LICENSE.txt](LICENSE.TXT) file for details.

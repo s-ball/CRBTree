@@ -78,6 +78,9 @@ extern "C" {
 	// Dump a tree
 	EXPORT int RBdump(RBTree* tree, size_t elt_width, void (*dump)(void*, char *));
 
+	// Duplicates a tree
+	EXPORT RBTree* RBclone(RBTree* old, void* (*process)(void* const));
+
 #ifdef __cplusplus
 }
 #endif
