@@ -121,7 +121,7 @@ Parameters
 
 *    tree	: the tree where to insert the element
 *    data	: the element to insert
-*    error	: a pointer to an int variable which if not `NULL` will be set to 0 if no error and a non zero value if error
+*    error	: a pointer to an int variable which if not `NULL` will be set to 0 if no error and a non-zero value if error
 
 Returns
 	: the previous element with same key if any or `NULL` 

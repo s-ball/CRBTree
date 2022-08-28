@@ -4,8 +4,8 @@ A C library for managing Red Black binary trees.
 
 ## Current status:
 
-This is a beta quality project because it has never be used in a real world
-application. It is developped using Visual
+This is a beta quality project because it has never been used in a real world
+application. It is developed using Visual
 Studio Community 2022, but is intended to be portable to any C platform.
 Tests use the *Google Test* framework and require a C++ environment.
 
@@ -16,7 +16,7 @@ only memory allocation failures are not covered...
 
 There are already a number of implementations of Red Black trees in a
  variety of languages. This one is intended to be provided under a
- liberal license (the well known MIT license) to be useable in any kind of 
+ liberal license (the well known MIT license) to be usable in any kind of 
  project. As an (interesting for me) side goal, it should be a way to 
  improve my C skills...
 
@@ -31,14 +31,14 @@ The library allows to:
  to the next existing element when the passed key is not found
 * delete elements from the tree
 * iterate the tree from the beginning or from a key
-* destroy a whole tree in a single operation and optionaly release its
+* destroy a whole tree in a single operation and optionally release its
  elements if passed a deleting function
 * duplicate a tree
 
 To allow a simpler usage to build native extensions for other languages,
 for example a C extension for Python, the library can use a comparison
 function taking a third argument (a pointer to integer) to signal
-abnormal conditions like non comparable objects.
+abnormal conditions like non-comparable objects.
 
 Bulk insertions from an array of elements or from another tree should be
 added in a future version.
@@ -56,11 +56,11 @@ The recommended usage is then to just add those files to your project and
  dump feature, you can safely ignore the `dump.c` file.
 
 A specific case in current version is the `EXPORT` macro. It allows the
-automatic generation of an import library on Microsort Visual Studio. On 
-a different system, it make probably sense to define `EXPORT` to be an
+automatic generation of an import library on Microsoft Visual Studio. On 
+a different system, it makes probably sense to define `EXPORT` to be an
 empty string (what I currently do to build the library on Ubuntu).
 
-### Developper usage
+### Developer usage
 
 Because of the liberal MIT license, you are allowed to use and modify this
 source at will. In order to ease development, a number of test files based
@@ -79,9 +79,9 @@ The public API is documented on the [API.md](API.md) page.
 ### The `dump.c` file and the `RBdump` function
 
 `RBdump` is a tool to easily display the content of a tree  with parent-child
-dependencies and red/black *color*. It is really dependant to implentation
+dependencies and red/black *color*. It is really dependant to implementation
 details and because of that is not member of the public API. Nevertheless, it
-can be an useful tool if someone wants to develop over this library.
+can be a useful tool if someone wants to develop over this library.
 
 ```
 int RBdump ( RBTree* tree, size_t elt_width, void(*dump)(void*, char*))
@@ -108,9 +108,9 @@ Returns
 
 ## Contributions
 
-I will be glad to recieve issues in GitHUB, either for current problems or
+I will be glad to receive issues in GitHUB, either for current problems or
 possible improvements or additional features. I shall try to answer them, but
-as I am not developping (nor even using) this professionaly, I may sometimes
+as I am not developing (nor even using) this professionally, I may sometimes
 not be very reactive.
 
 ## Versioning
@@ -123,7 +123,7 @@ any other commit, you can only expect to be *close* to what the release
 actually is.
 
 Currently, the `.Sub` part is never present on Git tagged release, and is
-expected to be 0 for those releases. It is intented to increment between
+expected to be 0 for those releases. It is intended to increment between
 those releases, with no specific pattern, but even that is not fully
 reliable.
 
